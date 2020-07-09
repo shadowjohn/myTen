@@ -78,7 +78,7 @@
                   var output = "";
                   results.forEach(function(result) {
                      console.log(result.title + " " + result.confidence);
-                     output+= result.title + " " + result.confidence + ",";
+                     output+= result.title + " " + sprintf("%.2f",result.confidence) + ",";
                   });
                   output = substr(output,0,-1);
                   smallComment(output,3000,false,{});    

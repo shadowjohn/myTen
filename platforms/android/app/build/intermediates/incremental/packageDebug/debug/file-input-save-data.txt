@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Wed Jun 17 11:11:39 CST 2020
+#Wed Jun 17 11:29:35 CST 2020
 5.base=C\:\\Users\\john.GIS\\Desktop\\project_tensflow\\myTen\\platforms\\android\\app\\build\\intermediates\\assets\\debug
 42.base=C\:\\Users\\john.GIS\\Desktop\\project_tensflow\\myTen\\platforms\\android\\app\\build\\intermediates\\assets\\debug
 22.path=www/img/classify1.txt
