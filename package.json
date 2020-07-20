@@ -11,6 +11,6 @@
     "license": "Apache-2.0",
     "dependencies": {
         "cordova": "^9.0.0",
-        "lodash": ">=4.17.19"
+        "lodash": "^4.17.19"
     }
 }
