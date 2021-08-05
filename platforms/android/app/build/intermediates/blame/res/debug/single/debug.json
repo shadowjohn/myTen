@@ -28,12 +28,12 @@
         "source": "E:\\mytools\\myTen\\platforms\\android\\app\\src\\main\\res\\drawable-port-xxxhdpi\\screen.png"
     },
     {
-        "merged": "F:\\mytools\\myTen\\platforms\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable-port-xxhdpi_screen.png.flat",
-        "source": "F:\\mytools\\myTen\\platforms\\android\\app\\src\\main\\res\\drawable-port-xxhdpi\\screen.png"
-    },
-    {
         "merged": "C:\\Users\\john.GIS\\Desktop\\project_tensflow\\myTen\\platforms\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable-land-mdpi_screen.png.flat",
         "source": "C:\\Users\\john.GIS\\Desktop\\project_tensflow\\myTen\\platforms\\android\\app\\src\\main\\res\\drawable-land-mdpi\\screen.png"
+    },
+    {
+        "merged": "F:\\mytools\\myTen\\platforms\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable-port-xxhdpi_screen.png.flat",
+        "source": "F:\\mytools\\myTen\\platforms\\android\\app\\src\\main\\res\\drawable-port-xxhdpi\\screen.png"
     },
     {
         "merged": "C:\\Users\\john.GIS\\Desktop\\project_tensflow\\myTen\\platforms\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable-land-hdpi_screen.png.flat",
