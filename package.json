@@ -20,7 +20,8 @@
         "underscore": ">=1.12.1",
         "uuid": "^8.3.2",
         "xmldom": ">=0.7.0",
-        "ansi-regex": ">=5.0.1"
+        "ansi-regex": ">=5.0.1",
+        "json-schema": ">=0.4.0"
     },
     "devDependencies": {
         "cordova-plugin-whitelist": "1"
