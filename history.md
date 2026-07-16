@@ -119,3 +119,9 @@
 - JDK 17 下 `npm test` 與 `npx cordova build android` 通過；`run.bat --device` 已成功安裝並啟動 V2302（10AD7E32MH00169）。
 - 本次終端驗證未操作手機畫面逐一確認 TF／Gemma 辨識與錯誤回復；需在 relay 持續開發期間以實機再確認。
 - Gemma 網路／CORS／HTTP／JSON 錯誤改顯示連線提示；relay `ok: false` 或空答案則顯示分析失敗提示。
+
+## 2026-07-16：Gemma 模式開關顯示修正
+
+- 相機預覽原本使用 `toBack: false`，原生預覽層會蓋住位於頂端的 HTML 模式開關。
+- 改用 `toBack: true` 並讓 `html`／`body` 背景透明，使 `TF Google`／`Gemma Vision` 開關與下方控制區能覆蓋在相機預覽上。
+- `npm test` 已加入相機圖層設定回歸檢查並通過。
