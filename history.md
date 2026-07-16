@@ -83,3 +83,10 @@
 - 不直接刪除已簽入的 Cordova 平台與外掛；舊 TensorFlow 外掛可能無法由原來源重建，需先確認替代來源或保留必要程式碼。
 - Android 平台將直接升至 `cordova-android@15.0.0`，接受最低版本提高為 Android 7.0（API 24）；不做 12／13 的過渡升級。
 - Windows 執行腳本統一使用 JDK 17 與專案本地 Cordova CLI；外掛只做新版建置所需的最小相容修正，不在本階段重寫 TensorFlow 流程。
+
+## 2026-07-16：辨識結果 UI 設計
+
+- 實機已確認相機拍照與 TensorFlow 辨識恢復正常，模型快取亦可載入。
+- 決定將辨識結果由 `smallComment` 浮層改為相機與辨識按鈕之間的固定區域，候選結果逐行顯示。
+- 介面與狀態文字使用繁體中文；ImageNet 類別名稱保留英文，信心值改為百分比。
+- 設計規格：`docs/superpowers/specs/2026-07-16-recognition-results-ui-design.md`。
