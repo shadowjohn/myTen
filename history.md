@@ -60,7 +60,7 @@
 
 - [x] 修正 GHSA-5xpp-75jx-m839（CVE-2026-50289）；`systeminformation <= 5.31.6` 受影響，專案不需要此套件，因此直接移除。
 - [x] 移除無效的 `xmldom` 直接依賴、升級 Cordova CLI 13.0.0，並以 lockfile 固定 `@xmldom/xmldom@0.9.10`；乾淨安裝與 audit 已通過。
-- [ ] 移除 `www/index.html` 載入的明文 HTTP 遠端除錯腳本；收緊 CSP、`access origin="*"` 與不必要的 intent 白名單。遠端腳本目前可在具原生外掛能力的 WebView 內執行。
+- [x] 移除 `www/index.html` 載入的明文 HTTP 遠端除錯腳本；CSP 僅允許本機資源、relay 與必要的資料 URI，Cordova access 僅允許 relay 與 TensorFlow 模型下載站，並移除 HTTP／HTTPS 萬用外部 intent。
 
 #### P1：恢復可建置與可操作
 

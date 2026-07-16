@@ -9,9 +9,8 @@
     </author>
     <content src="index.html" />
     <preference name="android-minSdkVersion" value="24" />
-    <access origin="*" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
+    <access origin="https://3wa.tw" />
+    <access origin="https://storage.googleapis.com" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />

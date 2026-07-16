@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'www', 'index.html'), 'utf8');
+const config = fs.readFileSync(path.join(__dirname, '..', 'config.xml'), 'utf8');
 
 assert.match(html, /document\.addEventListener\(['"]deviceready['"],\s*function\s*\(/);
 assert.doesNotMatch(html, /\$\(document\)\.ready/);
@@ -20,6 +21,9 @@ assert.match(html, /TF Google/);
 assert.match(html, /Gemma Vision/);
 assert.match(html, /recognitionMode\s*=\s*["']tensorflow["']/);
 assert.match(html, /https:\/\/3wa\.tw\/webservice\/relay_api\.php\?mode=photo_vision_upload/);
+assert.doesNotMatch(html, /<script\b[^>]*\bsrc=["']http:\/\//i);
+assert.match(html, /connect-src 'self' https:\/\/3wa\.tw/);
+assert.doesNotMatch(html, /default-src \*/);
 assert.match(html, /new FormData\(\)/);
 assert.match(html, /data\.append\(["']image["']/);
 assert.match(html, /data\.append\(["']text["']/);
@@ -29,6 +33,10 @@ assert.match(html, /controller\.abort\(\)/);
 assert.match(html, /html,\s*body\s*\{[\s\S]*?background:\s*transparent;/);
 assert.match(html, /toBack:\s*true/);
 assert.doesNotMatch(html, /3wa_live_/);
+assert.doesNotMatch(config, /<access origin=["']\*["']\s*\/>/);
+assert.match(config, /<access origin=["']https:\/\/3wa\.tw["']\s*\/>/);
+assert.match(config, /<access origin=["']https:\/\/storage\.googleapis\.com["']\s*\/>/);
+assert.doesNotMatch(config, /<allow-intent href=["']https?:\/\/\*\/\*["']\s*\/>/);
 const devicereadyIndex = html.indexOf("document.addEventListener('deviceready'");
 const recognitionInitIndex = html.indexOf('setRecognitionMode("tensorflow")');
 assert.ok(devicereadyIndex >= 0 && recognitionInitIndex > devicereadyIndex);
