@@ -4,7 +4,7 @@ Cordova Android 影像辨識原型。App 會開啟後鏡頭，拍攝 640 × 640 
 
 ## 專案狀態
 
-目前 Android 建置基線已恢復：Node 依賴可乾淨安裝，`cordova-android` 已升至 15.0.0，Windows 可使用 `run.bat` 以 JDK 17 執行；`run.bat --device` 已在 V2302 實機完成安裝、啟動、相機授權與預覽，Inception v1 模型也已完成下載、解壓與載入。TensorFlow 外掛仍使用舊版 32-bit `armeabi-v7a` 推論庫，拍照分類與重新啟動後的快取讀取仍需完成 smoke test。
+目前 Android 建置基線已恢復：Node 依賴可乾淨安裝，`cordova-android` 已升至 15.0.0，Windows 可使用 `run.bat` 以 JDK 17 執行；`run.bat --device` 已在 V2302 實機完成安裝、啟動、相機授權、預覽、拍照分類與重新啟動後的模型快取讀取。TensorFlow 外掛仍使用舊版 32-bit `armeabi-v7a` 推論庫。
 
 | 項目 | 專案內版本 |
 | --- | --- |
@@ -46,3 +46,5 @@ $env:CORDOVA_JAVA_HOME = 'D:\path\to\jdk-17'
 額外的 Cordova run 參數可直接附在後面，例如 `run.bat --device`。
 
 首次啟動會在背景下載約 50 MB 的 Inception v1 模型；目前畫面不顯示下載進度，需等待模型下載與解壓完成後再執行辨識。
+
+辨識結果固定顯示在相機與「辨識」按鈕之間：介面提示使用繁體中文，ImageNet 類別名稱保留英文，信心值顯示為百分比。

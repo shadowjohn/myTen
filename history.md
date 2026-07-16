@@ -67,7 +67,7 @@
 - [x] 升級 cordova-android 7.1.4、API 27 與 Android Gradle Plugin 3.0.1，並補齊 Gradle；CLI 已升至 13.0.0，但舊平台仍內含建置期的 `xmldom@0.1.27`。
 - [x] 把 Android platform 與 TensorFlow、Camera Preview、File、File Transfer、Zip 等實際外掛完整宣告到可重建設定；驗證乾淨重建成功後，再移除版本庫中的 `platforms/`、`plugins/` 與 build 產物。
 - [ ] 將 TensorFlow 與相機初始化移到 `deviceready` 後，補上模型下載、相機拍照與分類失敗處理；模型就緒前停用辨識按鈕。
-- [ ] 在實機完成一次啟動、模型下載、拍照、分類與重新啟動後快取讀取的 smoke test。
+- [x] 在實機完成一次啟動、模型下載、拍照、分類與重新啟動後快取讀取的 smoke test。
 
 #### P2：確認能跑後再清理
 
@@ -90,3 +90,10 @@
 - 決定將辨識結果由 `smallComment` 浮層改為相機與辨識按鈕之間的固定區域，候選結果逐行顯示。
 - 介面與狀態文字使用繁體中文；ImageNet 類別名稱保留英文，信心值改為百分比。
 - 設計規格：`docs/superpowers/specs/2026-07-16-recognition-results-ui-design.md`。
+
+### 實作與驗證
+
+- 將辨識結果由 3 秒 `smallComment` 浮層改為相機下方的固定逐行列表，加入中文初始、處理中與失敗狀態。
+- 辨識期間停用按鈕，完成或失敗後恢復；信心值改為百分比，ImageNet 類別名稱維持英文。
+- `npm test` 與 `git diff --check` 通過。
+- `.\run.bat --device` 完成建置、安裝與啟動，並在 V2302 實機確認版面與重複辨識正常。
