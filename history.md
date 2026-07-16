@@ -1,5 +1,10 @@
 # 開發紀錄
 
+## 2026-07-16：固定 Android 外掛來源
+
+- 將既有 TensorFlow 外掛完整保存於 `local-plugins/cordova-plugin-tensorflow`，並修正原生函式庫 ABI 目錄為 `armeabi-v7a`。
+- 固定 `cordova-android@15.0.0` 與實際使用的 Android 外掛版本，移除已淘汰的 Whitelist plugin，並將 Android 最低版本設為 API 24。
+
 ## 2026-07-16：恢復維護前盤點
 
 ### 已完成
