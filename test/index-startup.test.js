@@ -21,5 +21,8 @@ assert.match(html, /new FormData\(\)/);
 assert.match(html, /data\.append\(["']image["']/);
 assert.match(html, /data\.append\(["']text["']/);
 assert.doesNotMatch(html, /3wa_live_/);
+const devicereadyIndex = html.indexOf("document.addEventListener('deviceready'");
+const recognitionInitIndex = html.indexOf('setRecognitionMode("tensorflow")');
+assert.ok(devicereadyIndex >= 0 && recognitionInitIndex > devicereadyIndex);
 
 console.log('index startup and recognition UI checks passed');
