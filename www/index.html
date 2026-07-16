@@ -6,16 +6,74 @@
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">        
-        <title>Hello World</title>
+        <title>myTen 影像辨識</title>
         <style>
-          #runBtn{
-            position:absolute;
-            z-index:9999999;
-            left:45%;
-            bottom:5%;
-            width:80px;
-            height:60px;
-            font-size:16px;
+          html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background: #fff;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+          }
+
+          #controls {
+            position: fixed;
+            z-index: 9999999;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            height: 250px;
+            box-sizing: border-box;
+            flex-direction: column;
+            padding: 16px 24px 20px;
+            background: #fff;
+          }
+
+          #resultTitle {
+            margin: 0 0 6px;
+            color: #111827;
+            font-size: 18px;
+            text-align: center;
+          }
+
+          #resultList {
+            flex: 1;
+            min-height: 0;
+            margin: 0 0 12px;
+            padding: 0;
+            overflow-y: auto;
+            list-style: none;
+          }
+
+          #resultList li {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 3px 0;
+            color: #374151;
+            font-size: 14px;
+          }
+
+          #resultList .result-message {
+            display: block;
+            color: #6b7280;
+            text-align: center;
+          }
+
+          #runBtn {
+            width: 128px;
+            height: 56px;
+            align-self: center;
+            border: 0;
+            border-radius: 12px;
+            background: #111827;
+            color: #fff;
+            font-size: 18px;
+          }
+
+          #runBtn:disabled {
+            opacity: 0.55;
           }
         </style>
         <script src="cordova.js"></script>
@@ -26,11 +84,22 @@
         <script>
           var step = 0;
           var tf;
+          function showResultMessage(message) {
+            var resultList = document.getElementById("resultList");
+            var item = document.createElement("li");
+            resultList.innerHTML = "";
+            item.className = "result-message";
+            item.textContent = message;
+            resultList.appendChild(item);
+          }
+
+          function showRecognitionError(error) {
+            console.error(error);
+            showResultMessage("辨識失敗，請再試一次");
+            document.getElementById("runBtn").disabled = false;
+          }
+
           document.addEventListener('deviceready', function(){
-            $("#aBtn").unbind("click").click(function(){
-              alert('重新整理');
-              location.replace("?");
-            });
             console.log(1);
             tf = new TensorFlow('inception-v1');
       
@@ -71,20 +140,30 @@
             });
             */
             $("#runBtn").unbind("click").click(function(e){
-              CameraPreview.takePicture({width:640, height:640, quality: 85}, function(base64PictureData) {
-                var imgData = base64PictureData;
-                tf.classify(imgData).then(function(results) {
-                  console.log(7);
-                  var output = "";
+              var runBtn = document.getElementById("runBtn");
+              runBtn.disabled = true;
+              showResultMessage("辨識中…");
+
+              CameraPreview.takePicture({width:640, height:640, quality:85}, function(base64PictureData) {
+                tf.classify(base64PictureData).then(function(results) {
+                  var resultList = document.getElementById("resultList");
+                  resultList.innerHTML = "";
+
                   results.forEach(function(result) {
-                     console.log(result.title + " " + result.confidence);
-                     output+= result.title + " " + sprintf("%.2f",result.confidence) + ",";
+                    var item = document.createElement("li");
+                    var label = document.createElement("span");
+                    var confidence = document.createElement("strong");
+                    label.textContent = result.title;
+                    confidence.textContent = (result.confidence * 100).toFixed(1) + "%";
+                    item.appendChild(label);
+                    item.appendChild(confidence);
+                    resultList.appendChild(item);
                   });
-                  output = substr(output,0,-1);
-                  smallComment(output,3000,false,{});    
-                }); 
-              });
-              
+
+                  runBtn.disabled = false;
+                }, showRecognitionError);
+              }, showRecognitionError);
+
               e.stopPropagation();
             });
             var options = {
@@ -105,10 +184,12 @@
         </script>
     </head>
     <body>
-      <br><br>
-      <div align="right">
-        <input type="button" id="aBtn" value="重整">
-        <input type="button" id="runBtn" value="辨識">
+      <div id="controls">
+        <h1 id="resultTitle">辨識結果</h1>
+        <ul id="resultList" aria-live="polite">
+          <li class="result-message">辨識結果會顯示在這裡</li>
+        </ul>
+        <button type="button" id="runBtn">辨識</button>
       </div>
     </body>
 </html>
