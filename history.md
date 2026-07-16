@@ -8,18 +8,23 @@
 - 將 Camera Preview、File、File Transfer、Zip 升至已固定版本，移除已棄用的 Whitelist plugin。
 - 將 TensorFlow 0.0.1 外掛與原生檔保存至 `local-plugins/`，並修正 `armeabi-v7a` 打包路徑。
 - 新增 Windows `run.bat`，預設使用 JDK 17 與專案內 Cordova CLI。
+- 將 TensorFlow 與 Camera Preview 初始化從 DOM ready 移至 Cordova `deviceready`，確保原生外掛完成注入後才執行並觸發相機權限請求。
 
 ### 驗證結果
 
+- `npm test`：通過入口必須等待 `deviceready` 的回歸檢查。
 - `npm ci --no-audit --no-fund`：成功。
 - `npm audit`：0 件 vulnerability。
 - `npx cordova requirements android`：JDK、Android SDK、Android target 與 Gradle 均通過。
 - `npx cordova build android`：成功產生 `platforms/android/app/build/outputs/apk/debug/app-debug.apk`。
 - `run.bat --help`：成功，且 JDK 路徑錯誤時會回傳 exit code 1。
+- `run.bat --device`：在 V2302 實機完成 `INSTALL SUCCESS` 與 `LAUNCH SUCCESS`。
+- V2302 實機：`CAMERA` runtime permission 已授予，相機預覽可正常使用。
+- Inception v1：原 Google Storage URL 回傳 HTTP 200，49,937,555-byte zip 已完整下載，模型與 label 已解壓；WebView 狀態為 `loaded=true`、`cached=true`。
 
-### 尚待實機確認
+### 尚待實機功能確認
 
-- 在支援 32-bit App 的 Android 7.0+ 實機驗證相機預覽、模型下載、解壓縮、TensorFlow 載入與分類；目前原生推論庫只有 `armeabi-v7a`。
+- 在支援 32-bit App 的 Android 7.0+ 實機完成拍照分類，並驗證重新啟動後能直接讀取模型快取；目前原生推論庫只有 `armeabi-v7a`。
 
 ## 2026-07-16：固定 Android 外掛來源
 
