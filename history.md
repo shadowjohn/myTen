@@ -97,3 +97,11 @@
 - 辨識期間停用按鈕，完成或失敗後恢復；信心值改為百分比，ImageNet 類別名稱維持英文。
 - `npm test` 與 `git diff --check` 通過。
 - `.\run.bat --device` 完成建置、安裝與啟動，並在 V2302 實機確認版面與重複辨識正常。
+
+## 2026-07-16：Gemma Vision relay 設計
+
+- 使用者確認新增 `TF Google`／`Gemma Vision` 二段開關；預設仍為本機 TensorFlow。
+- Gemma 模式改走 `https://3wa.tw/webservice/relay_api.php?mode=photo_vision_upload`，App 只上傳圖片與正體中文提示，relay 負責後端模型與 token。
+- Nature token 不放入 App、APK、Git 或前端；relay 需允許 Cordova WebView 的 CORS。
+- Relay 尚在開發，實機 Gemma 驗證待 endpoint 可用後進行。
+- 設計規格：`docs/superpowers/specs/2026-07-16-gemma-vision-relay-design.md`。
