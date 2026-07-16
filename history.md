@@ -50,3 +50,5 @@
 - 不先批次升級所有套件；先讓安裝與建置可重現，再逐項升級並做實機驗證。
 - App 使用的是 WebView 原生 `DOMParser`，不需要 npm XML parser；不使用 npm override 硬蓋舊 Cordova，而是升級實際上游 CLI。
 - 不直接刪除已簽入的 Cordova 平台與外掛；舊 TensorFlow 外掛可能無法由原來源重建，需先確認替代來源或保留必要程式碼。
+- Android 平台將直接升至 `cordova-android@15.0.0`，接受最低版本提高為 Android 7.0（API 24）；不做 12／13 的過渡升級。
+- Windows 執行腳本統一使用 JDK 17 與專案本地 Cordova CLI；外掛只做新版建置所需的最小相容修正，不在本階段重寫 TensorFlow 流程。
