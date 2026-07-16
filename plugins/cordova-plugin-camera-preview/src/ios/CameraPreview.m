@@ -59,7 +59,10 @@
       self.webView.opaque = NO;
       self.webView.backgroundColor = [UIColor clearColor];
 
-      [self.webView.superview addSubview:self.cameraRenderController.view];
+      self.webView.scrollView.opaque = NO;
+      self.webView.scrollView.backgroundColor = [UIColor clearColor];
+
+      [self.viewController.view insertSubview:self.cameraRenderController.view atIndex:0];
       [self.webView.superview bringSubviewToFront:self.webView];
     } else {
       self.cameraRenderController.view.alpha = alpha;
@@ -205,16 +208,21 @@
   CDVPluginResult *pluginResult;
 
   if (self.sessionManager != nil) {
+    BOOL isTorchActive = [self.sessionManager isTorchActive];
     NSInteger flashMode = [self.sessionManager getFlashMode];
     NSString * sFlashMode;
-    if (flashMode == 0) {
-      sFlashMode = @"off";
-    } else if (flashMode == 1) {
-      sFlashMode = @"on";
-    } else if (flashMode == 2) {
-      sFlashMode = @"auto";
+    if (isTorchActive) {
+      sFlashMode = @"torch";
     } else {
-      sFlashMode = @"unsupported";
+      if (flashMode == 0) {
+        sFlashMode = @"off";
+      } else if (flashMode == 1) {
+        sFlashMode = @"on";
+      } else if (flashMode == 2) {
+        sFlashMode = @"auto";
+      } else {
+        sFlashMode = @"unsupported";
+      }
     }
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:sFlashMode ];
   } else {
@@ -466,7 +474,7 @@
             NSMutableArray *params = [[NSMutableArray alloc] init];
             [params addObject:base64Image];
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:params];
-            [pluginResult setKeepCallbackAsBool:true];
+            [pluginResult setKeepCallbackAsBool:false];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         });
     } else {

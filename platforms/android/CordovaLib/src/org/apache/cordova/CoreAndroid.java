@@ -1,23 +1,25 @@
-/*
-       Licensed to the Apache Software Foundation (ASF) under one
-       or more contributor license agreements.  See the NOTICE file
-       distributed with this work for additional information
-       regarding copyright ownership.  The ASF licenses this file
-       to you under the Apache License, Version 2.0 (the
-       "License"); you may not use this file except in compliance
-       with the License.  You may obtain a copy of the License at
+/**
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-         http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-       Unless required by applicable law or agreed to in writing,
-       software distributed under the License is distributed on an
-       "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-       KIND, either express or implied.  See the License for the
-       specific language governing permissions and limitations
-       under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
 */
 
 package org.apache.cordova;
+
+import org.apache.cordova.BuildHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,11 +28,13 @@ import org.json.JSONObject;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.content.IntentFilter;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 
 /**
@@ -43,7 +47,10 @@ public class CoreAndroid extends CordovaPlugin {
     private BroadcastReceiver telephonyReceiver;
     private CallbackContext messageChannel;
     private PluginResult pendingResume;
+    private PluginResult pendingPause;
+    private OnBackInvokedCallback backCallback;
     private final Object messageChannelLock = new Object();
+    private final Object backButtonHandlerLock = new Object();
 
     /**
      * Send an event to be fired on the Javascript side.
@@ -61,16 +68,19 @@ public class CoreAndroid extends CordovaPlugin {
     @Override
     public void pluginInitialize() {
         this.initTelephonyReceiver();
+        backCallback = null;
     }
 
     /**
      * Executes the request and returns PluginResult.
      *
      * @param action            The action to execute.
-     * @param args              JSONArry of arguments for the plugin.
+     * @param args              JSONArray of arguments for the plugin.
      * @param callbackContext   The callback context from which we were invoked.
+     *
      * @return                  A PluginResult object with a status and message.
      */
+    @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         PluginResult.Status status = PluginResult.Status.OK;
         String result = "";
@@ -80,10 +90,11 @@ public class CoreAndroid extends CordovaPlugin {
                 this.clearCache();
             }
             else if (action.equals("show")) {
-                // This gets called from JavaScript onCordovaReady to show the webview.
+                // This gets called from JavaScript onCordovaReady to show the WebView.
                 // I recommend we change the name of the Message as spinner/stop is not
-                // indicative of what this actually does (shows the webview).
+                // indicative of what this actually does (shows the WebView).
                 cordova.getActivity().runOnUiThread(new Runnable() {
+                    @Override
                     public void run() {
                         webView.getPluginManager().postMessage("spinner", "stop");
                     }
@@ -113,6 +124,10 @@ public class CoreAndroid extends CordovaPlugin {
 			else if (action.equals("messageChannel")) {
                 synchronized(messageChannelLock) {
                     messageChannel = callbackContext;
+                    if (pendingPause != null) {
+                        sendEventMessage(pendingPause);
+                        pendingPause = null;
+                    }
                     if (pendingResume != null) {
                         sendEventMessage(pendingResume);
                         pendingResume = null;
@@ -138,14 +153,15 @@ public class CoreAndroid extends CordovaPlugin {
      */
     public void clearCache() {
         cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
             public void run() {
-                webView.clearCache(true);
+                webView.clearCache();
             }
         });
     }
 
     /**
-     * Load the url into the webview.
+     * Load the url into the WebView.
      *
      * @param url
      * @param props			Properties that can be passed in to the Cordova activity (i.e. loadingDialog, wait, ...)
@@ -209,6 +225,7 @@ public class CoreAndroid extends CordovaPlugin {
      */
     public void clearHistory() {
         cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
             public void run() {
                 webView.clearHistory();
             }
@@ -221,6 +238,7 @@ public class CoreAndroid extends CordovaPlugin {
      */
     public void backHistory() {
         cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
             public void run() {
                 webView.backHistory();
             }
@@ -235,6 +253,29 @@ public class CoreAndroid extends CordovaPlugin {
      */
     public void overrideBackbutton(boolean override) {
         LOG.i("App", "WARNING: Back Button Default Behavior will be overridden.  The backbutton event will be fired!");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            if (override) {
+                synchronized (backButtonHandlerLock) {
+                    if (backCallback == null) {
+                        // The callback is intentionally empty. Since API 36, intercepting the back button is ignored, which means
+                        // the onDispatchKeyEvent boolean result won't actually stop native from consuming the back button and doing
+                        // it's own logic, UNLESS if there is an OnBackInvokedCallback registered on the dispatcher.
+                        // The key dispatch events will still fire, which still handles propagating back button events to the webview.
+                        // See https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back for more info on the caveat.
+                        backCallback = () -> {};
+                        this.cordova.getActivity().getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, backCallback);
+                    }
+                }
+            } else {
+                synchronized (backButtonHandlerLock) {
+                    if (backCallback != null) {
+                        this.cordova.getActivity().getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(backCallback);
+                        backCallback = null;
+                    }
+                }
+            }
+        }
+
         webView.setButtonPlumbedToJs(KeyEvent.KEYCODE_BACK, override);
     }
 
@@ -321,7 +362,19 @@ public class CoreAndroid extends CordovaPlugin {
         } catch (JSONException e) {
             LOG.e(TAG, "Failed to create event message", e);
         }
-        sendEventMessage(new PluginResult(PluginResult.Status.OK, obj));
+        PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
+
+        if (messageChannel == null) {
+            LOG.i(TAG, "Request to send event before messageChannel initialised: " + action);
+            if ("pause".equals(action)) {
+                pendingPause = result;
+            } else if ("resume".equals(action)) {
+                // When starting normally onPause then onResume is called
+                pendingPause = null;
+            }
+        } else {
+            sendEventMessage(result);
+        }
     }
 
     private void sendEventMessage(PluginResult payload) {
@@ -331,10 +384,10 @@ public class CoreAndroid extends CordovaPlugin {
         }
     }
 
-    /*
+    /**
      * Unregister the receiver
-     *
      */
+    @Override
     public void onDestroy()
     {
         webView.getContext().unregisterReceiver(this.telephonyReceiver);
@@ -359,32 +412,19 @@ public class CoreAndroid extends CordovaPlugin {
         }
     }
 
-      /*
+    /*
      * This needs to be implemented if you wish to use the Camera Plugin or other plugins
      * that read the Build Configuration.
      *
      * Thanks to Phil@Medtronic and Graham Borland for finding the answer and posting it to
      * StackOverflow.  This is annoying as hell!
      *
+     * @deprecated Use {@link BuildHelper#getBuildConfigValue} instead.
      */
-
+    @Deprecated
     public static Object getBuildConfigValue(Context ctx, String key)
     {
-        try
-        {
-            Class<?> clazz = Class.forName(ctx.getPackageName() + ".BuildConfig");
-            Field field = clazz.getField(key);
-            return field.get(null);
-        } catch (ClassNotFoundException e) {
-            LOG.d(TAG, "Unable to get the BuildConfig, is this built with ANT?");
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            LOG.d(TAG, key + " is not a valid field. Check your build.gradle");
-        } catch (IllegalAccessException e) {
-            LOG.d(TAG, "Illegal Access Exception: Let's print a stack trace.");
-            e.printStackTrace();
-        }
-
-        return null;
+        LOG.w(TAG, "CoreAndroid.getBuildConfigValue is deprecated and will be removed in a future release. Use BuildHelper.getBuildConfigValue instead.");
+        return BuildHelper.getBuildConfigValue(ctx, key);
     }
 }

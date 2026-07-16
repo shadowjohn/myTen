@@ -24,7 +24,7 @@
         <source-file src="src/android/tf_libs/Classifier.java" target-dir="src/org/tensorflow/demo" />
         <source-file src="src/android/tf_libs/TensorFlowImageClassifier.java" target-dir="src/org/tensorflow/demo" />
         <source-file src="src/android/tf_libs/libandroid_tensorflow_inference_java.jar" target-dir="libs" />
-        <source-file src="src/android/tf_libs/armeabi-v7a/libtensorflow_inference.so" target-dir="libs/armeabi" />
+        <source-file src="src/android/tf_libs/armeabi-v7a/libtensorflow_inference.so" target-dir="libs/armeabi-v7a" />
 
     </platform>
 
