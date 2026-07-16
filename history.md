@@ -105,3 +105,16 @@
 - Nature token 不放入 App、APK、Git 或前端；relay 需允許 Cordova WebView 的 CORS。
 - Relay 尚在開發，實機 Gemma 驗證待 endpoint 可用後進行。
 - 設計規格：`docs/superpowers/specs/2026-07-16-gemma-vision-relay-design.md`。
+
+## 2026-07-16：Gemma Vision 模式開關實作
+
+- 新增 `TF Google`／`Gemma Vision` 模式切換與共用忙碌狀態控制。
+- Gemma 模式將相片轉 Blob，以 multipart `image`／`text` POST 至 relay，並顯示 `answer` 或 `caption`。
+- `npm test` 與 `git diff --check` 通過。
+
+## 2026-07-16：Gemma Vision relay 驗證
+
+- Relay POST 以 `www/img/classify1.jpg` 實測成功，回傳 `ok: true`、`answer` 與 `caption`；未傳送 Nature token。
+- 回應含 `Access-Control-Allow-Origin: *`，可涵蓋 Cordova `https://localhost`；獨立 OPTIONS 預檢目前回傳 HTTP 405，multipart POST 未觸發預檢即可使用，若前端改加非簡單 request header 需 relay 端補 OPTIONS。
+- JDK 17 下 `npm test` 與 `npx cordova build android` 通過；`run.bat --device` 已成功安裝並啟動 V2302（10AD7E32MH00169）。
+- 本次終端驗證未操作手機畫面逐一確認 TF／Gemma 辨識與錯誤回復；需在 relay 持續開發期間以實機再確認。
