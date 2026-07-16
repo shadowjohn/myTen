@@ -1,5 +1,26 @@
 # 開發紀錄
 
+## 2026-07-16：cordova-android 15 升級
+
+### 已完成
+
+- 將 `cordova-android` 由 7.1.4 直接升至 15.0.0，最低 Android 版本調整為 7.0（API 24）。
+- 將 Camera Preview、File、File Transfer、Zip 升至已固定版本，移除已棄用的 Whitelist plugin。
+- 將 TensorFlow 0.0.1 外掛與原生檔保存至 `local-plugins/`，並修正 `armeabi-v7a` 打包路徑。
+- 新增 Windows `run.bat`，預設使用 JDK 17 與專案內 Cordova CLI。
+
+### 驗證結果
+
+- `npm ci --no-audit --no-fund`：成功。
+- `npm audit`：0 件 vulnerability。
+- `npx cordova requirements android`：JDK、Android SDK、Android target 與 Gradle 均通過。
+- `npx cordova build android`：成功產生 `platforms/android/app/build/outputs/apk/debug/app-debug.apk`。
+- `run.bat --help`：成功，且 JDK 路徑錯誤時會回傳 exit code 1。
+
+### 尚待實機確認
+
+- 在支援 32-bit App 的 Android 7.0+ 實機驗證相機預覽、模型下載、解壓縮、TensorFlow 載入與分類；目前原生推論庫只有 `armeabi-v7a`。
+
 ## 2026-07-16：固定 Android 外掛來源
 
 - 將既有 TensorFlow 外掛完整保存於 `local-plugins/cordova-plugin-tensorflow`，並修正原生函式庫 ABI 目錄為 `armeabi-v7a`。
@@ -38,8 +59,8 @@
 
 #### P1：恢復可建置與可操作
 
-- [ ] 升級 cordova-android 7.1.4、API 27 與 Android Gradle Plugin 3.0.1，並補齊 Gradle；CLI 已升至 13.0.0，但舊平台仍內含建置期的 `xmldom@0.1.27`。
-- [ ] 把 Android platform 與 TensorFlow、Camera Preview、File、File Transfer、Zip 等實際外掛完整宣告到可重建設定；驗證乾淨重建成功後，再移除版本庫中的 `platforms/`、`plugins/` 與 build 產物。
+- [x] 升級 cordova-android 7.1.4、API 27 與 Android Gradle Plugin 3.0.1，並補齊 Gradle；CLI 已升至 13.0.0，但舊平台仍內含建置期的 `xmldom@0.1.27`。
+- [x] 把 Android platform 與 TensorFlow、Camera Preview、File、File Transfer、Zip 等實際外掛完整宣告到可重建設定；驗證乾淨重建成功後，再移除版本庫中的 `platforms/`、`plugins/` 與 build 產物。
 - [ ] 將 TensorFlow 與相機初始化移到 `deviceready` 後，補上模型下載、相機拍照與分類失敗處理；模型就緒前停用辨識按鈕。
 - [ ] 在實機完成一次啟動、模型下載、拍照、分類與重新啟動後快取讀取的 smoke test。
 
