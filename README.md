@@ -57,4 +57,4 @@ Relay endpoint：
 
 `https://3wa.tw/webservice/relay_api.php?mode=photo_vision_upload`
 
-App 不保存或傳送 Nature token；relay 端負責模型呼叫。Relay 的 POST 回應需提供允許 Cordova WebView（`https://localhost`）的 CORS，例如 `Access-Control-Allow-Origin: *`。若 relay 尚未完成或無法連線，畫面會顯示中文錯誤並恢復按鈕與模式切換。
+App 不保存或傳送 Nature token；relay 端負責模型呼叫。Relay 的 POST 回應需提供允許 Cordova WebView（`https://localhost`）的 CORS，例如 `Access-Control-Allow-Origin: *`。Gemma 請求最長等待 45 秒；逾時或無法連線時會顯示中文錯誤並恢復按鈕與模式切換。
