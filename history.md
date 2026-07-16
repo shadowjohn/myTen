@@ -68,6 +68,7 @@
 - [x] 把 Android platform 與 TensorFlow、Camera Preview、File、File Transfer、Zip 等實際外掛完整宣告到可重建設定；驗證乾淨重建成功後，再移除版本庫中的 `platforms/`、`plugins/` 與 build 產物。
 - [ ] 將 TensorFlow 與相機初始化移到 `deviceready` 後，補上模型下載、相機拍照與分類失敗處理；模型就緒前停用辨識按鈕。
 - [x] 在實機完成一次啟動、模型下載、拍照、分類與重新啟動後快取讀取的 smoke test。
+- [ ] 將舊 TensorFlow Inference Interface 遷移至 TensorFlow Lite，維持既有 JavaScript `load`／`classify` API；轉換 Inception v1 模型，並以 TFLite runtime 支援 `armeabi-v7a`／`arm64-v8a`，再實機比對分類結果與模型快取。
 
 #### P2：確認能跑後再清理
 
