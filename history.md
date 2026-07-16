@@ -118,3 +118,4 @@
 - 回應含 `Access-Control-Allow-Origin: *`，可涵蓋 Cordova `https://localhost`；獨立 OPTIONS 預檢目前回傳 HTTP 405，multipart POST 未觸發預檢即可使用，若前端改加非簡單 request header 需 relay 端補 OPTIONS。
 - JDK 17 下 `npm test` 與 `npx cordova build android` 通過；`run.bat --device` 已成功安裝並啟動 V2302（10AD7E32MH00169）。
 - 本次終端驗證未操作手機畫面逐一確認 TF／Gemma 辨識與錯誤回復；需在 relay 持續開發期間以實機再確認。
+- Gemma 網路／CORS／HTTP／JSON 錯誤改顯示連線提示；relay `ok: false` 或空答案則顯示分析失敗提示。
