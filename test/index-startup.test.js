@@ -12,5 +12,14 @@ assert.match(html, /辨識中…/);
 assert.match(html, /辨識失敗，請再試一次/);
 assert.match(html, /\(result\.confidence\s*\*\s*100\)\.toFixed\(1\)\s*\+\s*["']%["']/);
 assert.doesNotMatch(html, /smallComment\s*\(/);
+assert.match(html, /id=["']modeToggle["']/);
+assert.match(html, /TF Google/);
+assert.match(html, /Gemma Vision/);
+assert.match(html, /recognitionMode\s*=\s*["']tensorflow["']/);
+assert.match(html, /https:\/\/3wa\.tw\/webservice\/relay_api\.php\?mode=photo_vision_upload/);
+assert.match(html, /new FormData\(\)/);
+assert.match(html, /data\.append\(["']image["']/);
+assert.match(html, /data\.append\(["']text["']/);
+assert.doesNotMatch(html, /3wa_live_/);
 
 console.log('index startup and recognition UI checks passed');

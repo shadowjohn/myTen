@@ -16,6 +16,46 @@
             font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
           }
 
+          #modeToggle {
+            position: fixed;
+            z-index: 9999999;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 999px;
+            background: rgba(17, 24, 39, 0.82);
+          }
+
+          .mode-option {
+            min-width: 92px;
+            padding: 8px 10px;
+            border: 0;
+            background: transparent;
+            color: #fff;
+            font-size: 13px;
+          }
+
+          .mode-option.active {
+            border-radius: 999px;
+            background: #fff;
+            color: #111827;
+          }
+
+          .mode-option:disabled,
+          #runBtn:disabled {
+            opacity: 0.55;
+          }
+
+          #resultList .result-text {
+            display: block;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            text-align: left;
+            white-space: pre-wrap;
+          }
+
           #controls {
             position: fixed;
             z-index: 9999999;
@@ -72,9 +112,6 @@
             font-size: 18px;
           }
 
-          #runBtn:disabled {
-            opacity: 0.55;
-          }
         </style>
         <script src="cordova.js"></script>
         <script src="http://59.126.75.42:8080/target/target-script-min.js#bbbbb"></script>
@@ -84,7 +121,11 @@
         <script>
           var step = 0;
           var tf;
-          function showResultMessage(message) {
+          var recognitionMode = "tensorflow";
+          var gemmaVisionEndpoint = "https://3wa.tw/webservice/relay_api.php?mode=photo_vision_upload";
+          var gemmaVisionPrompt = "請用正體中文描述這張圖片";
+
+          function setResultText(message) {
             var resultList = document.getElementById("resultList");
             var item = document.createElement("li");
             resultList.innerHTML = "";
@@ -93,11 +134,78 @@
             resultList.appendChild(item);
           }
 
+          function setGemmaResult(text) {
+            var resultList = document.getElementById("resultList");
+            var item = document.createElement("li");
+            resultList.innerHTML = "";
+            item.className = "result-text";
+            item.textContent = text;
+            resultList.appendChild(item);
+          }
+
+          function setRecognitionBusy(isBusy) {
+            document.getElementById("runBtn").disabled = isBusy;
+            document.querySelectorAll(".mode-option").forEach(function(button) {
+              button.disabled = isBusy;
+            });
+          }
+
+          function setRecognitionMode(mode) {
+            recognitionMode = mode;
+            document.querySelectorAll(".mode-option").forEach(function(button) {
+              var active = button.getAttribute("data-mode") === mode;
+              button.classList.toggle("active", active);
+              button.setAttribute("aria-pressed", active ? "true" : "false");
+            });
+            setResultText(mode === "gemma" ? "Gemma Vision 已選取" : "辨識結果會顯示在這裡");
+          }
+
+          function base64ToBlob(base64PictureData) {
+            var encoded = base64PictureData.indexOf(",") >= 0 ? base64PictureData.split(",")[1] : base64PictureData;
+            var binary = atob(encoded);
+            var bytes = new Uint8Array(binary.length);
+            for (var i = 0; i < binary.length; i += 1) {
+              bytes[i] = binary.charCodeAt(i);
+            }
+            return new Blob([bytes], {type: "image/jpeg"});
+          }
+
+          function analyzeWithGemma(base64PictureData) {
+            var data = new FormData();
+            data.append("image", base64ToBlob(base64PictureData), "myten-camera.jpg");
+            data.append("text", gemmaVisionPrompt);
+            return fetch(gemmaVisionEndpoint, {method: "POST", body: data}).then(function(response) {
+              return response.json().then(function(payload) {
+                if (!response.ok || !payload.ok) {
+                  throw new Error(payload.error || "relay_failed");
+                }
+                var answer = (payload.answer || payload.caption || "").trim();
+                if (!answer) {
+                  throw new Error("empty_answer");
+                }
+                return answer;
+              });
+            });
+          }
+
           function showRecognitionError(error) {
             console.error(error);
-            showResultMessage("辨識失敗，請再試一次");
-            document.getElementById("runBtn").disabled = false;
+            setResultText("辨識失敗，請再試一次");
+            setRecognitionBusy(false);
           }
+
+          function showGemmaError(error) {
+            console.error(error);
+            setResultText("Gemma Vision 分析失敗，請再試一次");
+            setRecognitionBusy(false);
+          }
+
+          document.querySelectorAll(".mode-option").forEach(function(button) {
+            button.addEventListener("click", function() {
+              setRecognitionMode(button.getAttribute("data-mode"));
+            });
+          });
+          setRecognitionMode("tensorflow");
 
           document.addEventListener('deviceready', function(){
             console.log(1);
@@ -140,15 +248,19 @@
             });
             */
             $("#runBtn").unbind("click").click(function(e){
-              var runBtn = document.getElementById("runBtn");
-              runBtn.disabled = true;
-              showResultMessage("辨識中…");
-
+              setRecognitionBusy(true);
+              setResultText(recognitionMode === "gemma" ? "Gemma Vision 分析中…" : "辨識中…");
               CameraPreview.takePicture({width:640, height:640, quality:85}, function(base64PictureData) {
+                if (recognitionMode === "gemma") {
+                  analyzeWithGemma(base64PictureData).then(function(answer) {
+                    setGemmaResult(answer);
+                    setRecognitionBusy(false);
+                  }, showGemmaError);
+                  return;
+                }
                 tf.classify(base64PictureData).then(function(results) {
                   var resultList = document.getElementById("resultList");
                   resultList.innerHTML = "";
-
                   results.forEach(function(result) {
                     var item = document.createElement("li");
                     var label = document.createElement("span");
@@ -159,11 +271,9 @@
                     item.appendChild(confidence);
                     resultList.appendChild(item);
                   });
-
-                  runBtn.disabled = false;
+                  setRecognitionBusy(false);
                 }, showRecognitionError);
-              }, showRecognitionError);
-
+              }, recognitionMode === "gemma" ? showGemmaError : showRecognitionError);
               e.stopPropagation();
             });
             var options = {
@@ -184,6 +294,10 @@
         </script>
     </head>
     <body>
+      <div id="modeToggle" role="group" aria-label="辨識模式">
+        <button type="button" class="mode-option active" data-mode="tensorflow" aria-pressed="true">TF Google</button>
+        <button type="button" class="mode-option" data-mode="gemma" aria-pressed="false">Gemma Vision</button>
+      </div>
       <div id="controls">
         <h1 id="resultTitle">辨識結果</h1>
         <ul id="resultList" aria-live="polite">
