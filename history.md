@@ -125,3 +125,9 @@
 - 相機預覽原本使用 `toBack: false`，原生預覽層會蓋住位於頂端的 HTML 模式開關。
 - 改用 `toBack: true` 並讓 `html`／`body` 背景透明，使 `TF Google`／`Gemma Vision` 開關與下方控制區能覆蓋在相機預覽上。
 - `npm test` 已加入相機圖層設定回歸檢查並通過。
+
+## 2026-07-16：Gemma Vision 逾時復原
+
+- Relay 連續實測皆回傳 HTTP 200，但首筆耗時 17.2 秒；前端原本沒有逾時，網路或 relay 卡住時會讓按鈕持續停用。
+- Gemma request 現在以 45 秒為限，逾時後中止支援中的 request、顯示連線提示並恢復操作。
+- `npm test` 已加入 timeout／abort 回歸檢查並通過。

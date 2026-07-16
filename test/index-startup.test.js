@@ -23,6 +23,9 @@ assert.match(html, /https:\/\/3wa\.tw\/webservice\/relay_api\.php\?mode=photo_vi
 assert.match(html, /new FormData\(\)/);
 assert.match(html, /data\.append\(["']image["']/);
 assert.match(html, /data\.append\(["']text["']/);
+assert.match(html, /gemmaVisionTimeoutMs\s*=\s*45000/);
+assert.match(html, /Promise\.race\(\[\s*fetch\(/);
+assert.match(html, /controller\.abort\(\)/);
 assert.match(html, /html,\s*body\s*\{[\s\S]*?background:\s*transparent;/);
 assert.match(html, /toBack:\s*true/);
 assert.doesNotMatch(html, /3wa_live_/);

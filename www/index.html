@@ -124,6 +124,7 @@
           var recognitionMode = "tensorflow";
           var gemmaVisionEndpoint = "https://3wa.tw/webservice/relay_api.php?mode=photo_vision_upload";
           var gemmaVisionPrompt = "請用正體中文描述這張圖片";
+          var gemmaVisionTimeoutMs = 45000;
 
           function setResultText(message) {
             var resultList = document.getElementById("resultList");
@@ -179,9 +180,26 @@
           function analyzeWithGemma(base64PictureData) {
             return Promise.resolve().then(function() {
               var data = new FormData();
+              var controller = window.AbortController ? new AbortController() : null;
+              var timeoutId;
+              var options = {method: "POST", body: data};
               data.append("image", base64ToBlob(base64PictureData), "myten-camera.jpg");
               data.append("text", gemmaVisionPrompt);
-              return fetch(gemmaVisionEndpoint, {method: "POST", body: data}).then(function(response) {
+              if (controller) {
+                options.signal = controller.signal;
+              }
+              return Promise.race([
+                fetch(gemmaVisionEndpoint, options),
+                new Promise(function(resolve, reject) {
+                  timeoutId = setTimeout(function() {
+                    if (controller) {
+                      controller.abort();
+                    }
+                    reject(gemmaError("connection", "timeout"));
+                  }, gemmaVisionTimeoutMs);
+                })
+              ]).then(function(response) {
+                clearTimeout(timeoutId);
                 if (!response.ok) {
                   throw gemmaError("connection", "http_error");
                 }
@@ -200,6 +218,9 @@
                   }
                   return answer;
                 });
+              }, function(error) {
+                clearTimeout(timeoutId);
+                throw error;
               });
             });
           }
