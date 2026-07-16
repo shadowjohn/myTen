@@ -48,13 +48,3 @@ $env:CORDOVA_JAVA_HOME = 'D:\path\to\jdk-17'
 首次啟動會在背景下載約 50 MB 的 Inception v1 模型；目前畫面不顯示下載進度，需等待模型下載與解壓完成後再執行辨識。
 
 辨識結果固定顯示在相機與「辨識」按鈕之間：介面提示使用繁體中文，ImageNet 類別名稱保留英文，信心值顯示為百分比。
-
-## Gemma Vision
-
-相機左上角可切換 `TF Google`（預設，本機 TensorFlow）與 `Gemma Vision`。切到 Gemma 後按「辨識」，App 會將單張 JPEG 與固定提示「請用正體中文描述這張圖片」送至 relay，並在結果區顯示 `answer`（空白時使用 `caption`）。
-
-Relay endpoint：
-
-`https://3wa.tw/webservice/relay_api.php?mode=photo_vision_upload`
-
-App 不保存或傳送 Nature token；relay 端負責模型呼叫。Relay 的 POST 回應需提供允許 Cordova WebView（`https://localhost`）的 CORS，例如 `Access-Control-Allow-Origin: *`。Gemma 請求最長等待 45 秒；逾時或無法連線時會顯示中文錯誤並恢復按鈕與模式切換。
